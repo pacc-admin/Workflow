@@ -2,6 +2,7 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
 import argparse
+import json
 from zlapi import ZaloAPI
 from zlapi.models import Message, ThreadType
 import time
@@ -16,20 +17,21 @@ import pytz
 # ==========================================
 # 1. CẤU HÌNH BIẾN
 # ==========================================
-SERVICE_ACCOUNT_FILE = 'service_account.json'
-SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HWEEgcMOzDjOg-zm4LbSEnGHz00kC0d20XVW5zqDeFY/edit?gid=1573501749#gid=1573501749'
-LOG_SHEET_NAME = 'PO_pdf_log'
-TIMEZONE = pytz.timezone('Asia/Ho_Chi_Minh')
+TOKEN_FILE = os.environ.get('USER_TOKEN_FILE', 'token.json')
+TOKEN_JSON = os.environ.get('TOKEN_JSON')
+SHEET_URL = os.environ.get('SHEET_URL', 'https://docs.google.com/spreadsheets/d/1HWEEgcMOzDjOg-zm4LbSEnGHz00kC0d20XVW5zqDeFY/edit?gid=1573501749#gid=1573501749')
+LOG_SHEET_NAME = os.environ.get('LOG_SHEET_NAME', 'PO_pdf_log')
+TIMEZONE = pytz.timezone(os.environ.get('TIMEZONE', 'Asia/Ho_Chi_Minh'))
 ALLOWED_FREQUENCIES = ['DAILY', 'WEEKLY', 'MONTHLY']
 
 # ========== ZALO CREDENTIALS ==========
-PHONE = "0799014286"
-IMEI = "c1d952aa-dc48-4cc2-90a2-fd3972ac284f-3c9fc7ddec9b58823c1c96756dbd45d8"
-COOKIE = "__zi=3000.SSZzejyD6zOgdh2mtnLQWYQN_RAG01ICFjIXe9fEM8usc-Iba4vNZ7YOvQROJ5cCT9pifJap.1; __zi-legacy=3000.SSZzejyD6zOgdh2mtnLQWYQN_RAG01ICFjIXe9fEM8usc-Iba4vNZ7YOvQROJ5cCT9pifJap.1; ozi=2000.QOBlzDCV2uGerkFzm09Vqs3SwVRD25pT9TxkzuKAKjqfskVqEJC.1; _ga=GA1.2.283285246.1764396874; _ga_NVN38N77J3=GS2.2.s1764407756$o2$g1$t1764407819$j60$l0$h0; _ga_E63JS7SPBL=GS2.1.s1764407755$o2$g1$t1764407820$j58$l0$h0; _zlang=vn; app.event.zalo.me=6171837798728654383; _gid=GA1.2.1364011123.1777878794; _ga_3EM8ZPYYN3=GS2.2.s1777878794$o10$g1$t1777879722$j60$l0$h0; zpsid=PuqO.282972265.98.UwmmtV1RhH6PYt01_5kj4OKetoF8QPGcmccR987wYTkso7ZryVBdwPbRhH4; zpw_sek=Qu0h.282972265.a0.xtd46ux0qvRd40w6hy3JblNYjlsi-l7nwl6KfyEtliB1Zf7PouccyBkBbQJV_Uwqyx5oiaI6G4DgmN_STgdJbW"
+PHONE = os.environ.get('ZALO_PHONE', "0799014286")
+IMEI = os.environ.get('ZALO_IMEI', "c1d952aa-dc48-4cc2-90a2-fd3972ac284f-3c9fc7ddec9b58823c1c96756dbd45d8")
+COOKIE = os.environ.get('ZALO_COOKIE', "__zi=3000.SSZzejyD6zOgdh2mtnLQWYQN_RAG01ICFjIXe9fEM8usc-Iba4vNZ7YOvQROJ5cCT9pifJap.1; __zi-legacy=3000.SSZzejyD6zOgdh2mtnLQWYQN_RAG01ICFjIXe9fEM8usc-Iba4vNZ7YOvQROJ5cCT9pifJap.1; ozi=2000.QOBlzDCV2uGerkFzm09Vqs3SwVRD25pT9TxkzuKAKjqfskVqEJC.1; _ga=GA1.2.283285246.1764396874; _ga_NVN38N77J3=GS2.2.s1764407756$o2$g1$t1764407819$j60$l0$h0; _ga_E63JS7SPBL=GS2.1.s1764407755$o2$g1$t1764407820$j58$l0$h0; _zlang=vn; app.event.zalo.me=6171837798728654383; _gid=GA1.2.1364011123.1777878794; _ga_3EM8ZPYYN3=GS2.2.s1777878794$o10$g1$t1777879722$j60$l0$h0; zpsid=PuqO.282972265.98.UwmmtV1RhH6PYt01_5kj4OKetoF8QPGcmccR987wYTkso7ZryVBdwPbRhH4; zpw_sek=Qu0h.282972265.a0.xtd46ux0qvRd40w6hy3JblNYjlsi-l7nwl6KfyEtliB1Zf7PouccyBkBbQJV_Uwqyx5oiaI6G4DgmN_STgdJbW")
 
 # ========== TEST MODE (Gửi vào Group ID cố định để test) ==========
-USE_TEST_MODE = True
-TEST_GROUP_ID = "3410445310157946128"
+USE_TEST_MODE = os.environ.get('USE_TEST_MODE', 'True').strip().lower() in ('1', 'true', 'yes')
+TEST_GROUP_ID = os.environ.get('TEST_GROUP_ID', "3410445310157946128")
 
 # ========== PRODUCTION MODE (Gửi vào từng Group ID từ Sheet) ==========
 # Uncomment khối code dưới để chuyển sang production mode
@@ -46,7 +48,12 @@ SCOPES = [
 # ==========================================
 # 2. KHỞI TẠO SERVICE
 # ==========================================
-user_creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+if TOKEN_JSON:
+    token_info = json.loads(TOKEN_JSON)
+    user_creds = Credentials.from_authorized_user_info(token_info, SCOPES)
+else:
+    user_creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
+
 gc = gspread.authorize(user_creds)
 
 def parse_args():

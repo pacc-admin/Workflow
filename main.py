@@ -1,5 +1,6 @@
 import os
 import io
+import json
 import datetime
 import pandas as pd
 import pytz
@@ -14,13 +15,16 @@ from google.oauth2.credentials import Credentials
 # ==========================================
 # 1. CẤU HÌNH BIẾN (BẠN ĐIỀN THÔNG TIN VÀO ĐÂY)
 # ==========================================
-SERVICE_ACCOUNT_FILE = 'service_account.json' # Đường dẫn tới file JSON vừa tải
-BQ_PROJECT_ID = 'pacc-analytics-prod'
-BQ_DATASET_ID = 'pacc'
-BQ_TABLE_NAME = 'int_grn_po'
+SERVICE_ACCOUNT_FILE = os.environ.get('SERVICE_ACCOUNT_FILE', 'service_account.json')
+SERVICE_ACCOUNT_JSON = os.environ.get('SERVICE_ACCOUNT_JSON')
+TOKEN_FILE = os.environ.get('USER_TOKEN_FILE', 'token.json')
+TOKEN_JSON = os.environ.get('TOKEN_JSON')
+BQ_PROJECT_ID = os.environ.get('BQ_PROJECT_ID', 'pacc-analytics-prod')
+BQ_DATASET_ID = os.environ.get('BQ_DATASET_ID', 'pacc')
+BQ_TABLE_NAME = os.environ.get('BQ_TABLE_NAME', 'int_grn_po')
 
-TEMPLATE_ID = '1qqXARPKGghXpdwyHaa5B8-QrTp1b-WCWWRtrezD6yBw'
-ROOT_FOLDER_ID = '1rijuHPPJ5KoC4wgrwF9F1TeySuhLBA_z'
+TEMPLATE_ID = os.environ.get('TEMPLATE_ID', '1qqXARPKGghXpdwyHaa5B8-QrTp1b-WCWWRtrezD6yBw')
+ROOT_FOLDER_ID = os.environ.get('ROOT_FOLDER_ID', '1rijuHPPJ5KoC4wgrwF9F1TeySuhLBA_z')
 
 WAREHOUSE_FOLDERS = {
     'HCM-BG7-NKKN': '10xuPahVis7D9kozAWNShTgM7fr3-p4UW',
@@ -31,10 +35,10 @@ WAREHOUSE_FOLDERS = {
     'HCM-HO1'     : '1MAQn-lMcykDVKNXwXvYmDtXOukjJhmBS'
 }
 
-SHEET_URL = 'https://docs.google.com/spreadsheets/d/1HWEEgcMOzDjOg-zm4LbSEnGHz00kC0d20XVW5zqDeFY/edit?gid=1573501749#gid=1573501749' # ĐIỀN LINK SHEET LOG VÀO ĐÂY
-LOG_SHEET_NAME = 'PO_pdf_log'
-MAX_PER_RUN = 100
-TIMEZONE = pytz.timezone('Asia/Ho_Chi_Minh')
+SHEET_URL = os.environ.get('SHEET_URL', 'https://docs.google.com/spreadsheets/d/1HWEEgcMOzDjOg-zm4LbSEnGHz00kC0d20XVW5zqDeFY/edit?gid=1573501749#gid=1573501749')
+LOG_SHEET_NAME = os.environ.get('LOG_SHEET_NAME', 'PO_pdf_log')
+MAX_PER_RUN = int(os.environ.get('MAX_PER_RUN', '100'))
+TIMEZONE = pytz.timezone(os.environ.get('TIMEZONE', 'Asia/Ho_Chi_Minh'))
 
 # ==========================================
 # 2. KHỞI TẠO CÁC SERVICE GOOGLE
@@ -46,12 +50,20 @@ SCOPES = [
 ]
 
 # 1. BigQuery: Vẫn xài Service Account (như cũ)
-sa_creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE)
+if SERVICE_ACCOUNT_JSON:
+    sa_info = json.loads(SERVICE_ACCOUNT_JSON)
+    sa_creds = service_account.Credentials.from_service_account_info(sa_info)
+else:
+    sa_creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE)
 bq_client = bigquery.Client(credentials=sa_creds, project=BQ_PROJECT_ID)
 
 # 2. Drive, Docs, Sheets: Xài Token cá nhân của bạn
 # Nó sẽ tự động làm mới token mỗi khi chạy mà không cần đăng nhập
-user_creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+if TOKEN_JSON:
+    token_info = json.loads(TOKEN_JSON)
+    user_creds = Credentials.from_authorized_user_info(token_info, SCOPES)
+else:
+    user_creds = Credentials.from_authorized_user_file(TOKEN_FILE, SCOPES)
 
 drive_service = build('drive', 'v3', credentials=user_creds)
 docs_service = build('docs', 'v1', credentials=user_creds)
