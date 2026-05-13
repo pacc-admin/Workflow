@@ -1,9 +1,14 @@
 steps:
-- name: 'gcr.io/cloud-builders/docker'
-  args:
-  - build
-  - '-t'
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/workflow/workflow:latest'
-  - '.'
+  # Build Docker Image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'asia-southeast1-docker.pkg.dev/pacc-raw-data/pacc-repo/pacc-workflow:latest', '.']
+  
+  # Push Docker Image lên Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'asia-southeast1-docker.pkg.dev/pacc-raw-data/pacc-repo/pacc-workflow:latest']
+
 images:
-- 'us-central1-docker.pkg.dev/$PROJECT_ID/workflow/workflow:latest'
+  - 'asia-southeast1-docker.pkg.dev/pacc-raw-data/pacc-repo/pacc-workflow:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
