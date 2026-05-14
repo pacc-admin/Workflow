@@ -240,6 +240,20 @@ def main(frequency='DAILY'):
     print(f"❌ Gửi thất bại: {failed_count} đơn hàng")
     print("=" * 50)
 
+    # G. Ghi metrics của lần chạy này
+    try:
+        if os.path.exists('run_metrics.json'):
+            with open('run_metrics.json', 'r', encoding='utf-8') as f:
+                metrics = json.load(f)
+        else:
+            metrics = {}
+        metrics['zalo_sent'] = sent_count
+        with open('run_metrics.json', 'w', encoding='utf-8') as f:
+            json.dump(metrics, f, ensure_ascii=False)
+        print(f"📊 Ghi metrics: {sent_count} Zalo gửi")
+    except Exception as e:
+        print(f"⚠️  Lỗi ghi metrics: {e}")
+
 if __name__ == '__main__':
     frequency = parse_args()
     main(frequency)

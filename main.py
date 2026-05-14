@@ -289,5 +289,11 @@ def main():
         worksheet.append_rows(log_buffer, value_input_option='USER_ENTERED')
         print("✅ Đã lưu xong!")
 
+    # E. Ghi metrics của lần chạy này
+    metrics = {'pdf_created': count}
+    with open('run_metrics.json', 'w', encoding='utf-8') as f:
+        json.dump(metrics, f, ensure_ascii=False)
+    print(f"📊 Ghi metrics: {count} PDF tạo")
+
 if __name__ == '__main__':
     main()
