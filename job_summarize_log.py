@@ -73,7 +73,7 @@ def get_po_expected_count():
         COUNT(DISTINCT po_pr_key) as total_pos
     FROM `{BQ_PROJECT_ID}.{BQ_DATASET_ID}.{BQ_TABLE_NAME}` 
     WHERE LOWER(frequency) = 'daily'
-      AND DATE(po_tran_date) = CURRENT_DATE('Asia/Ho_Chi_Minh')-1
+      AND DATE(po_tran_date) = CURRENT_DATE('Asia/Ho_Chi_Minh')
     GROUP BY 1
     ORDER BY 3 DESC
     """
