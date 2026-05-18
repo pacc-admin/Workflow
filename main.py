@@ -118,13 +118,14 @@ def create_pdf_from_template(po_data, items_df):
 
     # XỬ LÝ BẢNG BẰNG CÁCH NỐI CHUỖI (NEWLINE HACK)
     # Lấy cột tương ứng, ép kiểu về String, xử lý dữ liệu trống, rồi nối các dòng lại bằng ký tự xuống dòng (\n)
-    col_item_id = '\n'.join(items_df['item_id'].astype(str).replace('nan', ''))
-    col_item_name = '\n'.join(items_df['item_name'].astype(str).replace('nan', ''))
-    col_unit_id = '\n'.join(items_df['unit_id'].astype(str).replace('nan', ''))
+    row_separator = '\n\n'  # khoảng cách rộng hơn trong mỗi ô table
+    col_item_id = row_separator.join(items_df['item_id'].astype(str).replace('nan', ''))
+    col_item_name = row_separator.join(items_df['item_name'].astype(str).replace('nan', ''))
+    col_unit_id = row_separator.join(items_df['unit_id'].astype(str).replace('nan', ''))
     
     # Đối với quantity, format cho đẹp (bỏ đuôi .0 nếu có)
     items_df['quantity_order'] = items_df['quantity_order'].fillna(0)
-    col_qty = '\n'.join(items_df['quantity_order'].apply(lambda x: f"{x:g}"))
+    col_qty = row_separator.join(items_df['quantity_order'].apply(lambda x: f"{x:g}"))
 
     # 2. Replace Text Variables (Gộp cả thông tin PO và Bảng)
     replace_dict = {
