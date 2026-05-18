@@ -28,7 +28,7 @@ BQ_TABLE_NAME = os.environ.get('BQ_TABLE_NAME', 'int_grn_po')
 SHEET_URL = os.environ.get('SHEET_URL', 'https://docs.google.com/spreadsheets/d/1HWEEgcMOzDjOg-zm4LbSEnGHz00kC0d20XVW5zqDeFY/edit?gid=1573501749#gid=1573501749')
 LOG_SHEET_NAME = os.environ.get('LOG_SHEET_NAME', 'PO_pdf_log')
 
-EMAIL_RECIPIENTS = os.environ.get('EMAIL_RECIPIENTS', 'dataengineerpacc@gmail.com,pacc.qc@gmail.com').split(',')
+EMAIL_RECIPIENTS = os.environ.get('EMAIL_RECIPIENTS', 'dataengineerpacc@gmail.com,pacc.qc@gmail.com,pacc.workplace@paccgroup.vn').split(',')
 EMAIL_RECIPIENTS = [e.strip() for e in EMAIL_RECIPIENTS if e.strip()]
 
 TIMEZONE = pytz.timezone(os.environ.get('TIMEZONE', 'Asia/Ho_Chi_Minh'))
