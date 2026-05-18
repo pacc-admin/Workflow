@@ -116,16 +116,63 @@ def create_pdf_from_template(po_data, items_df):
     copied_file = drive_service.files().copy(fileId=TEMPLATE_ID, body=body, supportsAllDrives=True).execute()
     doc_id = copied_file.get('id')
 
-    # XỬ LÝ BẢNG BẰNG CÁCH NỐI CHUỖI (NEWLINE HACK)
-    # Lấy cột tương ứng, ép kiểu về String, xử lý dữ liệu trống, rồi nối các dòng lại bằng ký tự xuống dòng (\n)
-    row_separator = '\n\n'  # khoảng cách rộng hơn trong mỗi ô table
-    col_item_id = row_separator.join(items_df['item_id'].astype(str).replace('nan', ''))
-    col_item_name = row_separator.join(items_df['item_name'].astype(str).replace('nan', ''))
-    col_unit_id = row_separator.join(items_df['unit_id'].astype(str).replace('nan', ''))
+    # XỬ LÝ BẢNG: Align các cột bằng padding spaces + separator rõ ràng
+    def format_item_for_table(value, max_width=30):
+        """Format giá trị để fit vào bảng, cắt nếu quá dài"""
+        text = str(value).strip()
+        if len(text) > max_width:
+            # Nếu quá dài, cắt và wrap vào dòng tiếp
+            words = text.split()
+            lines = []
+            current_line = []
+            for word in words:
+                if len(' '.join(current_line + [word])) <= max_width:
+                    current_line.append(word)
+                else:
+                    if current_line:
+                        lines.append(' '.join(current_line))
+                    current_line = [word]
+            if current_line:
+                lines.append(' '.join(current_line))
+            return '\n'.join(lines)
+        return text
     
-    # Đối với quantity, format cho đẹp (bỏ đuôi .0 nếu có)
+    # Chuẩn bị dữ liệu với format
+    col_id_list = [format_item_for_table(x) for x in items_df['item_id'].astype(str).replace('nan', '')]
+    col_name_list = [format_item_for_table(x, max_width=35) for x in items_df['item_name'].astype(str).replace('nan', '')]
+    col_unit_list = [format_item_for_table(x) for x in items_df['unit_id'].astype(str).replace('nan', '')]
+    
     items_df['quantity_order'] = items_df['quantity_order'].fillna(0)
-    col_qty = row_separator.join(items_df['quantity_order'].apply(lambda x: f"{x:g}"))
+    col_qty_list = [format_item_for_table(x) for x in items_df['quantity_order'].apply(lambda x: f"{x:g}")]
+    
+    # Tìm max lines và align mỗi item
+    aligned_items = []
+    for i in range(len(col_id_list)):
+        # Đếm số dòng (explicit newlines)
+        max_lines = max(
+            col_id_list[i].count('\n') + 1,
+            col_name_list[i].count('\n') + 1,
+            col_unit_list[i].count('\n') + 1,
+            col_qty_list[i].count('\n') + 1
+        )
+        
+        # Pad với newlines để cùng chiều cao
+        def ensure_lines(text, target_lines):
+            current_lines = text.count('\n') + 1
+            return text + '\n' * (target_lines - current_lines)
+        
+        aligned_items.append((
+            ensure_lines(col_id_list[i], max_lines),
+            ensure_lines(col_name_list[i], max_lines),
+            ensure_lines(col_unit_list[i], max_lines),
+            ensure_lines(col_qty_list[i], max_lines)
+        ))
+    
+    # Join với separator \n\n (2 dòng cách giữa items)
+    col_item_id = '\n\n'.join([item[0] for item in aligned_items])
+    col_item_name = '\n\n'.join([item[1] for item in aligned_items])
+    col_unit_id = '\n\n'.join([item[2] for item in aligned_items])
+    col_qty = '\n\n'.join([item[3] for item in aligned_items])
 
     # 2. Replace Text Variables (Gộp cả thông tin PO và Bảng)
     replace_dict = {
