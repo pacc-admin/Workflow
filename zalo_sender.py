@@ -25,9 +25,9 @@ TIMEZONE = pytz.timezone(os.environ.get('TIMEZONE', 'Asia/Ho_Chi_Minh'))
 ALLOWED_FREQUENCIES = ['DAILY', 'WEEKLY', 'MONTHLY']
 
 # ========== ZALO CREDENTIALS ==========
-PHONE = os.environ.get('ZALO_PHONE', "0799014286")
-IMEI = os.environ.get('ZALO_IMEI', "c1d952aa-dc48-4cc2-90a2-fd3972ac284f-3c9fc7ddec9b58823c1c96756dbd45d8")
-COOKIE = os.environ.get('ZALO_COOKIE', "__zi=3000.SSZzejyD6zOgdh2mtnLQWYQN_RAG01ICFjIXe9fEM8usc-Iba4vNZ7YOvQROJ5cCT9pifJap.1; __zi-legacy=3000.SSZzejyD6zOgdh2mtnLQWYQN_RAG01ICFjIXe9fEM8usc-Iba4vNZ7YOvQROJ5cCT9pifJap.1; ozi=2000.QOBlzDCV2uGerkFzm09Vqs3SwVRD25pT9TxkzuKAKjqfskVqEJC.1; _ga=GA1.2.283285246.1764396874; _ga_NVN38N77J3=GS2.2.s1764407756$o2$g1$t1764407819$j60$l0$h0; _ga_E63JS7SPBL=GS2.1.s1764407755$o2$g1$t1764407820$j58$l0$h0; _zlang=vn; app.event.zalo.me=6171837798728654383; _gid=GA1.2.1364011123.1777878794; _ga_3EM8ZPYYN3=GS2.2.s1777878794$o10$g1$t1777879722$j60$l0$h0; zpsid=PuqO.282972265.98.UwmmtV1RhH6PYt01_5kj4OKetoF8QPGcmccR987wYTkso7ZryVBdwPbRhH4; zpw_sek=Qu0h.282972265.a0.xtd46ux0qvRd40w6hy3JblNYjlsi-l7nwl6KfyEtliB1Zf7PouccyBkBbQJV_Uwqyx5oiaI6G4DgmN_STgdJbW")
+PHONE = os.environ.get('ZALO_PHONE', "0396880989")
+IMEI = os.environ.get('ZALO_IMEI', "acb23337-932b-4088-aa3f-e26b0fac0cba-90daa551604269dbcdcf237b5cc700f3")
+COOKIE = os.environ.get('ZALO_COOKIE', "__zi=3000.SSZzejyD7D4ecRUgqn5LsYBOiwdR7HgNFvQziPX129rnshouqmu9a77Vkl3K3m_OSzowyDu22DKn.1; __zi-legacy=3000.SSZzejyD7D4ecRUgqn5LsYBOiwdR7HgNFvQziPX129rnshouqmu9a77Vkl3K3m_OSzowyDu22DKn.1; zoaw_sek=Mwg6.304597146.3.6_P2zTaXX6j3wQDvsI64QzaXX6lP8OHhs620ax0XX6i; zoaw_type=0; _gid=GA1.2.384305111.1779073780; _zlang=vn; _gat=1; _ga_RYD7END4JE=GS2.2.s1779087842$o4$g1$t1779087843$j59$l0$h0; _ga_YS1V643LGV=GS2.1.s1779087842$o3$g0$t1779087843$j59$l0$h0; _ga=GA1.2.2098202610.1741932988; _ga_3EM8ZPYYN3=GS2.2.s1779087850$o5$g0$t1779087850$j60$l0$h0; zpsid=MRPl.196304666.25.M-fanEtwiB3tfGExuVgmi9Y9me7Kp8E0sSo6XjT0SJarLxITx089keVwiB0; zpw_sek=OzSy.196304666.a0.M52Ao8J6sP2UcMgRfSRPaF_alFkc_FlpvQkmySwqjz_jfOFYjl6S_zItdVRp--Io-VnZKGqUT9Ifno4fZgpPa0; app.event.zalo.me=2794251787792731214")
 
 # ========== TEST MODE (Gửi vào Group ID cố định để test) ==========
 USE_TEST_MODE = os.environ.get('USE_TEST_MODE', 'True').strip().lower() in ('1', 'true', 'yes')
@@ -36,8 +36,8 @@ TEST_GROUP_ID = os.environ.get('TEST_GROUP_ID', "3410445310157946128")
 # ========== PRODUCTION MODE (Gửi vào từng Group ID từ Sheet) ==========
 # Uncomment khối code dưới để chuyển sang production mode
 # ──────────────────────────────────────────────────────────────────────────────
-# USE_TEST_MODE = False
-# TEST_GROUP_ID = None
+USE_TEST_MODE = False
+TEST_GROUP_ID = None
 # ──────────────────────────────────────────────────────────────────────────────
 
 SCOPES = [
